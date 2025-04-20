@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>中信兄弟每日語錄</title>
+  <title>中信兄弟每日語錄 + 賽事應援</title>
   <style>
     body {
       margin: 0;
@@ -35,7 +35,7 @@
       margin: 1em 0 1.5em;
       font-weight: 600;
     }
-    #tagline {
+    #tagline, #game {
       font-size: 1.1rem;
       color: #555;
       margin-bottom: 1em;
@@ -68,6 +68,7 @@
     <div id="tagline">今天也一起應援吧！</div>
     <div id="quote">語錄載入中...</div>
     <button id="playBtn" onclick="playVoice()">點擊播放語音</button>
+    <div id="game">賽事載入中...</div>
   </div>
   <div class="corner-icon">🐘</div>
 
@@ -89,18 +90,36 @@
       "在球場上並肩作戰，在人生中彼此支撐。",
       "沒有到不了的遠方，只有放棄的途中。"
     ];
-    const bgImages = ["bg1.jpg", "bg2.jpg", "bg3.jpg"]; // 背景圖片檔案
+
+    const games = {
+      "2025-04-20": "中信兄弟 vs 富邦悍將（15:05，臺北大巨蛋）",
+      "2025-04-21": "今日無比賽，養精蓄銳再出發！",
+      "2025-04-22": "中信兄弟 vs 統一獅（18:35，洲際棒球場）",
+      "2025-04-23": "中信兄弟 vs 統一獅（18:35，洲際棒球場）",
+      "2025-04-24": "中信兄弟 vs 統一獅（18:35，洲際棒球場）"
+      // 更多賽程可持續擴充
+    };
+
+    const bgImages = ["bg1.jpg", "bg2.jpg", "bg3.jpg"];
     const today = new Date();
-    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-    const index = seed % quotes.length;
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+
+    const seed = parseInt(y + m + d);
+    const quoteIndex = seed % quotes.length;
     const bgIndex = seed % bgImages.length;
+
     document.body.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
-    const dailyQuote = quotes[index];
-    document.getElementById("quote").textContent = dailyQuote;
+    document.getElementById("quote").textContent = quotes[quoteIndex];
+
+    // 顯示今日賽事
+    const gameInfo = games[dateStr] || "今日無比賽，但兄弟魂持續燃燒🔥";
+    document.getElementById("game").textContent = `📅 今日賽事：${gameInfo}`;
 
     function playVoice() {
-      if (!dailyQuote) return;
-      const utterance = new SpeechSynthesisUtterance(dailyQuote);
+      const utterance = new SpeechSynthesisUtterance(quotes[quoteIndex]);
       utterance.lang = "zh-TW";
       utterance.pitch = 1;
       utterance.rate = 1;
@@ -116,6 +135,7 @@
   </script>
 </body>
 </html>
+
 
 
 
