@@ -1,143 +1,153 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>中信兄弟每日語錄 + 賽事應援</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>第7課：單字朗讀練習</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: "Microsoft JhengHei", sans-serif;
-      background-color: #FFF9DB;
-      background-image: url("bg1.jpg");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
+      font-family: 'Arial', 'Hiragino Kaku Gothic ProN', '游ゴシック', sans-serif;
+      background-color: #fff0f5;
       color: #333;
-    }
-    .container {
-      max-width: 600px;
-      margin: 5% auto;
-      text-align: center;
-      padding: 20px;
-      background: rgba(255,255,255,0.6);
-      border-radius: 8px;
+      padding: 2rem;
     }
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5em;
-    }
-    #quote {
-      font-size: 1.5rem;
-      line-height: 1.6;
-      margin: 1em 0 1.5em;
-      font-weight: 600;
-    }
-    #tagline, #game {
-      font-size: 1.1rem;
-      color: #555;
-      margin-bottom: 1em;
-    }
-    button#playBtn {
-      font-size: 1rem;
-      padding: 0.6em 1.2em;
-      color: #333;
-      background: #fdf2b4;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button#playBtn:hover {
-      background: #fce985;
-    }
-    .corner-icon {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
+      text-align: center;
+      color: #d26fa0;
       font-size: 2rem;
-      opacity: 0.8;
-      pointer-events: none;
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 12px #e3a5c7;
+    }
+    th, td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid #f0cde3;
+    }
+    th {
+      background-color: #f8d8e9;
+      color: #c04583;
+    }
+    td.jp:hover, td.cn:hover {
+      cursor: pointer;
+      background-color: #ffeaf5;
+      transition: background-color 0.3s, transform 0.2s;
+      transform: scale(1.02);
+    }
+    .autoplay-btn {
+      background-color: #d26fa0;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+    .autoplay-btn:hover {
+      background-color: #c04583;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>中信兄弟每日語錄</h1>
-    <div id="tagline">今天也一起應援吧！</div>
-    <div id="quote">語錄載入中...</div>
-    <button id="playBtn" onclick="playVoice()">點擊播放語音</button>
-    <div id="game">賽事載入中...</div>
-  </div>
-  <div class="corner-icon">🐘</div>
+  <h1>📘 第7課：單字＋例句朗讀練習</h1>
+
+  <button id="autoplay-btn" class="autoplay-btn">🔊 自動播放</button>
+
+  <table>
+    <tr>
+      <th>單字（日文）</th>
+      <th>中文意思</th>
+      <th>例句（日文）</th>
+      <th>中文翻譯</th>
+    </tr>
+    <tr><td class="jp">きります（切ります）</td><td class="cn">剪、切</td><td class="jp">はさみで かみを きります。</td><td class="cn">用剪刀剪紙。</td></tr>
+    <tr><td class="jp">おくります（送ります）</td><td class="cn">寄、送</td><td class="jp">ともだちに プレゼントを おくります。</td><td class="cn">送禮物給朋友。</td></tr>
+    <tr><td class="jp">あげます</td><td class="cn">給</td><td class="jp">せんせいに おかしを あげます。</td><td class="cn">給老師點心。</td></tr>
+    <tr><td class="jp">もらいます</td><td class="cn">得到</td><td class="jp">ともだちに はなを もらいます。</td><td class="cn">收到朋友送的花。</td></tr>
+    <tr><td class="jp">かします（貸します）</td><td class="cn">借給</td><td class="jp">ともだちに おかねを かします。</td><td class="cn">借錢給朋友。</td></tr>
+  </table>
 
   <script>
-    const quotes = [
-      "兄弟齊心，其利斷金！",
-      "不離不棄，永遠一家！",
-      "黃衫精神，代代相傳。",
-      "勝利屬於堅持到底的人！",
-      "每一次揮棒，都為了心中的夢想！",
-      "跌倒了就再站起來，兄弟們永遠在你身邊。",
-      "奪冠之路需要一步一步來，大象雖然走得慢，但是一步一步，還是會走到終點。",
-      "將失敗化為養分，明天會更強大。",
-      "團結一心，沒有跨不過的難關。",
-      "用笑容迎接每一次挑戰！",
-      "黃衫軍絕不退縮，熱血永不熄！",
-      "今天流的汗，會是明天的光芒。",
-      "兄弟情深，同心協力創造奇蹟。",
-      "在球場上並肩作戰，在人生中彼此支撐。",
-      "沒有到不了的遠方，只有放棄的途中。"
-    ];
+    let voicesLoaded = false;
+    let jpVoice = null;
+    let cnVoice = null;
+    let autoPlay = false;
+    let currentIndex = 0;
+    let vocabRows = [];
 
-    const games = {
-      "2025-04-20": "中信兄弟 vs 富邦悍將（15:05，臺北大巨蛋）",
-      "2025-04-21": "今日無比賽，養精蓄銳再出發！",
-      "2025-04-22": "中信兄弟 vs 統一獅（18:35，洲際棒球場）",
-      "2025-04-23": "中信兄弟 vs 統一獅（18:35，洲際棒球場）",
-      "2025-04-24": "中信兄弟 vs 統一獅（18:35，洲際棒球場）"
-      // 更多賽程可持續擴充
-    };
-
-    const bgImages = ["bg1.jpg", "bg2.jpg", "bg3.jpg"];
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
-    const dateStr = `${y}-${m}-${d}`;
-
-    const seed = parseInt(y + m + d);
-    const quoteIndex = seed % quotes.length;
-    const bgIndex = seed % bgImages.length;
-
-    document.body.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
-    document.getElementById("quote").textContent = quotes[quoteIndex];
-
-    // 顯示今日賽事
-    const gameInfo = games[dateStr] || "今日無比賽，但兄弟魂持續燃燒🔥";
-    document.getElementById("game").textContent = `📅 今日賽事：${gameInfo}`;
-
-    function playVoice() {
-      const utterance = new SpeechSynthesisUtterance(quotes[quoteIndex]);
-      utterance.lang = "zh-TW";
-      utterance.pitch = 1;
-      utterance.rate = 1;
+    function initVoices() {
       const voices = speechSynthesis.getVoices();
-      for (let v of voices) {
-        if (v.lang.startsWith("zh") && (v.name.includes("Female") || v.name.includes("女"))) {
-          utterance.voice = v;
-          break;
-        }
+      jpVoice = voices.find(voice => voice.lang === 'ja-JP');
+      cnVoice = voices.find(voice => voice.lang === 'zh-CN') || voices.find(voice => voice.lang === 'zh-TW');
+      voicesLoaded = true;
+    }
+
+    function speak(text, lang) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      if (lang === 'ja-JP' && jpVoice) {
+        utterance.voice = jpVoice;
+      } else if ((lang === 'zh-CN' || lang === 'zh-TW') && cnVoice) {
+        utterance.voice = cnVoice;
       }
       speechSynthesis.speak(utterance);
     }
+
+    function autoPlayNext() {
+      if (!autoPlay) return;
+      
+      const row = vocabRows[currentIndex];
+      const jpText = row.querySelector('.jp').textContent.trim();
+      const cnText = row.querySelector('.cn').textContent.trim();
+
+      // 先念日文，再念中文
+      speak(jpText, 'ja-JP');
+      setTimeout(() => speak(cnText, 'zh-CN'), 1500); // 中文延遲 1.5 秒
+
+      // 下一個單字
+      currentIndex = (currentIndex + 1) % vocabRows.length;
+      setTimeout(autoPlayNext, 4000); // 每組日中朗讀間隔 4 秒
+    }
+
+    function toggleAutoPlay() {
+      autoPlay = !autoPlay;
+      const btn = document.getElementById('autoplay-btn');
+      if (autoPlay) {
+        btn.textContent = '⏹️ 停止自動播放';
+        currentIndex = 0;
+        autoPlayNext();
+      } else {
+        btn.textContent = '🔊 自動播放';
+        speechSynthesis.cancel();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initVoices();
+      vocabRows = Array.from(document.querySelectorAll('tr')).slice(1); // 跳過表頭
+
+      // 自動播放按鈕
+      document.getElementById('autoplay-btn').addEventListener('click', toggleAutoPlay);
+
+      // 點擊單字或中文播放
+      document.querySelectorAll('.jp, .cn').forEach(element => {
+        element.addEventListener('click', () => {
+          const text = element.textContent.trim();
+          const lang = element.classList.contains('jp') ? 'ja-JP' : 'zh-CN';
+          speak(text, lang);
+        });
+      });
+    });
   </script>
 </body>
 </html>
-
-
-
-
 
 
