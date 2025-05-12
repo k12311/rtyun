@@ -99,63 +99,129 @@
   <div class="button-home">
     <a href="index.html">回首頁 🏠</a>
   </div>
-  <script>
+<script>
     let voicesLoaded = false;
     let currentIndex = 0;
-    let autoPlayInterval;
+    let isPlaying = false;
     let jpVoice;
     const rows = document.querySelectorAll("td.jp");
 
     function initializeVoices() {
-      const voices = speechSynthesis.getVoices();
-      jpVoice = voices.find(voice => voice.lang === 'ja-JP');
-      voicesLoaded = !!jpVoice;
+        const voices = speechSynthesis.getVoices();
+        jpVoice = voices.find(voice => voice.lang === 'ja-JP');
+        voicesLoaded = !!jpVoice;
+        console.log("Voices initialized:", jpVoice);
     }
 
-    function speakJP(text, meaning) {
-      if (!voicesLoaded) {
-        initializeVoices();
-      }
-      if (!jpVoice) return; // 如果沒有日文語音則返回
-
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text + '、' + meaning);
-      utterance.lang = 'ja-JP';
-      utterance.voice = jpVoice;
-      speechSynthesis.speak(utterance);
-    }
-
-    function startAutoPlay() {
-      if (autoPlayInterval) return;
-      currentIndex = 0; // 確保從頭開始播放
-      autoPlayInterval = setInterval(() => {
-        if (currentIndex >= rows.length) {
-          resetAutoPlay();
-          return;
+    function ensureVoicesInitialized(callback) {
+        if (voicesLoaded) {
+            callback();
+        } else {
+            speechSynthesis.onvoiceschanged = () => {
+                initializeVoices();
+                if (voicesLoaded) callback();
+            };
+            initializeVoices(); // 嘗試立即初始化
         }
+    }
+
+    function speakJP(text, meaning, callback) {
+        ensureVoicesInitialized(() => {
+            if (!jpVoice) return;
+
+            // 日文發音
+            const jpUtterance = new SpeechSynthesisUtterance(text);
+            jpUtterance.lang = 'ja-JP';
+            jpUtterance.voice = jpVoice;
+
+            // 中文發音
+            const zhUtterance = new SpeechSynthesisUtterance(meaning);
+            zhUtterance.lang = 'zh-TW';
+
+            // 日文播放完畢後播放中文
+            jpUtterance.onend = () => {
+                setTimeout(() => {
+                    speechSynthesis.speak(zhUtterance);
+                }, 300);
+            };
+
+            // 中文播放完畢後回調
+            zhUtterance.onend = () => {
+                if (callback) callback();
+            };
+
+            // 開始播放日文
+            speechSynthesis.cancel();
+            speechSynthesis.speak(jpUtterance);
+        });
+    }
+
+    function playNextRow() {
+        if (currentIndex >= rows.length) {
+            pauseAutoPlay();
+            return;
+        }
+
+        // 設置當前播放高亮
         rows.forEach(row => row.classList.remove('playing'));
         const currentCell = rows[currentIndex];
         currentCell.classList.add('playing');
-        speakJP(currentCell.dataset.text, currentCell.dataset.meaning);
-        currentIndex++;
-      }, 3000);
+
+        // 開始播放當前單字或句子
+        speakJP(currentCell.dataset.text, currentCell.dataset.meaning, () => {
+            currentIndex++;
+            playNextRow();  // 播放下一個
+        });
+    }
+
+    function startAutoPlay() {
+        if (isPlaying) return;
+        isPlaying = true;
+        currentIndex = 0;
+        playNextRow();
     }
 
     function pauseAutoPlay() {
-      clearInterval(autoPlayInterval);
-      autoPlayInterval = null;
+        speechSynthesis.cancel();
+        rows.forEach(row => row.classList.remove('playing'));
+        isPlaying = false;
     }
 
     function resetAutoPlay() {
-      pauseAutoPlay();
-      currentIndex = 0;
-      rows.forEach(row => row.classList.remove('playing'));
-      startAutoPlay();
+        pauseAutoPlay();
+        currentIndex = 0;
+        playNextRow();
+        isPlaying = true;
+    }
+
+    function playSingleCell(cell) {
+        const text = cell.dataset.text;
+        const meaning = cell.dataset.meaning;
+
+        // 設置點擊單元格的播放效果
+        rows.forEach(row => row.classList.remove('playing'));
+        cell.classList.add('playing');
+
+        // 單獨播放
+        speakJP(text, meaning, () => {
+            cell.classList.remove('playing');
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      initializeVoices();
+        // 初始化語音
+        ensureVoicesInitialized(() => {
+            console.log("Voices fully initialized.");
+        });
+
+        // 點擊單字或句子時播放
+        rows.forEach(row => {
+            row.addEventListener('click', () => {
+                playSingleCell(row);
+            });
+        });
     });
-  </script>
+</script>
 </body>
 </html>
+
