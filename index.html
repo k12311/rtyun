@@ -34,120 +34,124 @@
       background-color: #f8d8e9;
       color: #c04583;
     }
-    td.jp:hover, td.cn:hover {
+    td.jp:hover {
       cursor: pointer;
       background-color: #ffeaf5;
-      transition: background-color 0.3s, transform 0.2s;
-      transform: scale(1.02);
     }
-    .autoplay-btn {
-      background-color: #d26fa0;
+    .button-home {
+      margin-top: 2rem;
+      display: block;
+      text-align: center;
+    }
+    .button-home a {
+      background-color: #ffaad4;
       color: white;
       padding: 0.8rem 1.5rem;
+      text-decoration: none;
       border-radius: 20px;
       font-weight: bold;
-      cursor: pointer;
-      margin-top: 20px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: background-color 0.3s;
     }
-    .autoplay-btn:hover {
+    .button-home a:hover {
+      background-color: #f98fc3;
+    }
+    .controls {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .controls button {
+      background-color: #d26fa0;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      margin: 0.5rem;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .controls button:hover {
       background-color: #c04583;
+    }
+    .playing {
+      background-color: #ffeaf5 !important;
     }
   </style>
 </head>
 <body>
   <h1>📘 第7課：單字＋例句朗讀練習</h1>
-
-  <button id="autoplay-btn" class="autoplay-btn">🔊 自動播放</button>
-
-  <table>
+  <table id="vocab-table">
     <tr>
       <th>單字（日文）</th>
       <th>中文意思</th>
       <th>例句（日文）</th>
       <th>中文翻譯</th>
     </tr>
-    <tr><td class="jp">きります（切ります）</td><td class="cn">剪、切</td><td class="jp">はさみで かみを きります。</td><td class="cn">用剪刀剪紙。</td></tr>
-    <tr><td class="jp">おくります（送ります）</td><td class="cn">寄、送</td><td class="jp">ともだちに プレゼントを おくります。</td><td class="cn">送禮物給朋友。</td></tr>
-    <tr><td class="jp">あげます</td><td class="cn">給</td><td class="jp">せんせいに おかしを あげます。</td><td class="cn">給老師點心。</td></tr>
-    <tr><td class="jp">もらいます</td><td class="cn">得到</td><td class="jp">ともだちに はなを もらいます。</td><td class="cn">收到朋友送的花。</td></tr>
-    <tr><td class="jp">かします（貸します）</td><td class="cn">借給</td><td class="jp">ともだちに おかねを かします。</td><td class="cn">借錢給朋友。</td></tr>
+    <tr><td class="jp" data-text="きります" data-meaning="剪、切">きります（切ります）</td><td>剪、切</td><td class="jp" data-text="はさみで かみを きります。">はさみで かみを きります。</td><td>用剪刀剪紙。</td></tr>
+    <tr><td class="jp" data-text="おくります" data-meaning="寄、送">おくります（送ります）</td><td>寄、送</td><td class="jp" data-text="ともだちに プレゼントを おくります。">ともだちに プレゼントを おくります。</td><td>送禮物給朋友。</td></tr>
+    <tr><td class="jp" data-text="あげます" data-meaning="給">あげます</td><td>給</td><td class="jp" data-text="せんせいに おかしを あげます。">せんせいに おかしを あげます。</td><td>給老師點心。</td></tr>
   </table>
-
+  <div class="controls">
+    <button onclick="startAutoPlay()">開始播放</button>
+    <button onclick="pauseAutoPlay()">暫停播放</button>
+    <button onclick="resetAutoPlay()">重播</button>
+  </div>
+  <div class="button-home">
+    <a href="index.html">回首頁 🏠</a>
+  </div>
   <script>
     let voicesLoaded = false;
-    let jpVoice = null;
-    let cnVoice = null;
-    let autoPlay = false;
     let currentIndex = 0;
-    let vocabRows = [];
+    let autoPlayInterval;
+    const rows = document.querySelectorAll("td.jp");
 
-    function initVoices() {
-      const voices = speechSynthesis.getVoices();
-      jpVoice = voices.find(voice => voice.lang === 'ja-JP');
-      cnVoice = voices.find(voice => voice.lang === 'zh-CN') || voices.find(voice => voice.lang === 'zh-TW');
-      voicesLoaded = true;
-    }
-
-    function speak(text, lang) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      if (lang === 'ja-JP' && jpVoice) {
-        utterance.voice = jpVoice;
-      } else if ((lang === 'zh-CN' || lang === 'zh-TW') && cnVoice) {
-        utterance.voice = cnVoice;
+    function speakJP(text, meaning) {
+      if (!voicesLoaded) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          voicesLoaded = true;
+          speakJP(text, meaning);
+        };
+        speechSynthesis.getVoices();
+        return;
       }
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text + '、' + meaning);
+      utterance.lang = 'ja-JP';
+      const jpVoice = speechSynthesis.getVoices().find(voice => voice.lang === 'ja-JP');
+      if (jpVoice) utterance.voice = jpVoice;
       speechSynthesis.speak(utterance);
     }
 
-    function autoPlayNext() {
-      if (!autoPlay) return;
-      
-      const row = vocabRows[currentIndex];
-      const jpText = row.querySelector('.jp').textContent.trim();
-      const cnText = row.querySelector('.cn').textContent.trim();
-
-      // 先念日文，再念中文
-      speak(jpText, 'ja-JP');
-      setTimeout(() => speak(cnText, 'zh-CN'), 1500); // 中文延遲 1.5 秒
-
-      // 下一個單字
-      currentIndex = (currentIndex + 1) % vocabRows.length;
-      setTimeout(autoPlayNext, 4000); // 每組日中朗讀間隔 4 秒
+    function startAutoPlay() {
+      if (autoPlayInterval) return;
+      autoPlayInterval = setInterval(() => {
+        if (currentIndex >= rows.length) {
+          resetAutoPlay();
+          return;
+        }
+        rows.forEach(row => row.classList.remove('playing'));
+        const currentCell = rows[currentIndex];
+        currentCell.classList.add('playing');
+        speakJP(currentCell.dataset.text, currentCell.dataset.meaning);
+        currentIndex++;
+      }, 3000);
     }
 
-    function toggleAutoPlay() {
-      autoPlay = !autoPlay;
-      const btn = document.getElementById('autoplay-btn');
-      if (autoPlay) {
-        btn.textContent = '⏹️ 停止自動播放';
-        currentIndex = 0;
-        autoPlayNext();
-      } else {
-        btn.textContent = '🔊 自動播放';
-        speechSynthesis.cancel();
-      }
+    function pauseAutoPlay() {
+      clearInterval(autoPlayInterval);
+      autoPlayInterval = null;
+    }
+
+    function resetAutoPlay() {
+      pauseAutoPlay();
+      currentIndex = 0;
+      rows.forEach(row => row.classList.remove('playing'));
+      startAutoPlay();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      initVoices();
-      vocabRows = Array.from(document.querySelectorAll('tr')).slice(1); // 跳過表頭
-
-      // 自動播放按鈕
-      document.getElementById('autoplay-btn').addEventListener('click', toggleAutoPlay);
-
-      // 點擊單字或中文播放
-      document.querySelectorAll('.jp, .cn').forEach(element => {
-        element.addEventListener('click', () => {
-          const text = element.textContent.trim();
-          const lang = element.classList.contains('jp') ? 'ja-JP' : 'zh-CN';
-          speak(text, lang);
-        });
-      });
+      voicesLoaded = speechSynthesis.getVoices().length > 0;
     });
   </script>
 </body>
 </html>
-
-
