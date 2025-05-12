@@ -103,27 +103,31 @@
     let voicesLoaded = false;
     let currentIndex = 0;
     let autoPlayInterval;
+    let jpVoice;
     const rows = document.querySelectorAll("td.jp");
+
+    function initializeVoices() {
+      const voices = speechSynthesis.getVoices();
+      jpVoice = voices.find(voice => voice.lang === 'ja-JP');
+      voicesLoaded = !!jpVoice;
+    }
 
     function speakJP(text, meaning) {
       if (!voicesLoaded) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          voicesLoaded = true;
-          speakJP(text, meaning);
-        };
-        speechSynthesis.getVoices();
-        return;
+        initializeVoices();
       }
+      if (!jpVoice) return; // 如果沒有日文語音則返回
+
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text + '、' + meaning);
       utterance.lang = 'ja-JP';
-      const jpVoice = speechSynthesis.getVoices().find(voice => voice.lang === 'ja-JP');
-      if (jpVoice) utterance.voice = jpVoice;
+      utterance.voice = jpVoice;
       speechSynthesis.speak(utterance);
     }
 
     function startAutoPlay() {
       if (autoPlayInterval) return;
+      currentIndex = 0; // 確保從頭開始播放
       autoPlayInterval = setInterval(() => {
         if (currentIndex >= rows.length) {
           resetAutoPlay();
@@ -150,7 +154,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      voicesLoaded = speechSynthesis.getVoices().length > 0;
+      initializeVoices();
     });
   </script>
 </body>
