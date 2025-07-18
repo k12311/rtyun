@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>韓文 TTS 測試頁面</title>
+  <style>
+    body { background: #f0f8ff; font-family: Arial, sans-serif; padding: 2rem; text-align: center; }
+    h1 { color: #d26fa0; }
+    button {
+      background-color: #ffc0cb;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 1rem;
+    }
+    button:hover {
+      background-color: #ffa7bd;
+    }
+    p { font-size: 1.1rem; margin: 1rem auto; max-width: 320px; }
+  </style>
+</head>
+<body>
+  <h1>🔊 韓文 TTS 測試頁面</h1>
+  <p>請點擊下方按鈕，確認您的手機是否能朗讀韓文</p>
+  <button onclick="speak('안녕하세요')">🔊 안녕하세요（你好）</button>
+  <button onclick="speak('저는 학생입니다')">🔊 저는 학생입니다（我是學生）</button>
+  <button onclick="speak('몇 살이에요?')">🔊 몇 살이에요?（幾歲？）</button>
+  <p style="margin-top: 2rem;">📌 若無聲音，請依照說明安裝韓語 TTS 語音包</p>
+  <script>
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
